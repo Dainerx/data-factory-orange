@@ -69,6 +69,9 @@ class StockDAO
                 }
             }
         }
+
+        krsort($result[self::OUT]);
+        $result[self::OUT] = array_reverse($result[self::OUT]);
         return $result;
     }
 
