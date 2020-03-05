@@ -45,23 +45,27 @@ class StockDAO
             $d1 = $d[0];
             $d2 = $d[1];
             $result[self::IN][$d1] = [];
-            $result[self::OUT][$d2] = [];
+            if ($d2 != NULL)
+                $result[self::OUT][$d2] = [];
             foreach ($teams as $team) {
                 $result[self::IN][$d1][$team] = [];
-                $result[self::OUT][$d2][$team] = [];
+                if ($d2 != NULL)
+                    $result[self::OUT][$d2][$team] = [];
                 foreach ($products as $product) {
                     $total1 = $this->countProductForDate1AndTeam(
                         $d1,
                         $team,
                         $product
                     )['total'];
-                    $total2 = $this->countProductForDate2AndTeam(
-                        $d2,
-                        $team,
-                        $product
-                    )['total'];
+                    if ($d2 != NULL)
+                        $total2 = $this->countProductForDate2AndTeam(
+                            $d2,
+                            $team,
+                            $product
+                        )['total'];
                     $result[self::IN][$d1][$team][$product] = $total1;
-                    $result[self::OUT][$d2][$team][$product] = $total2;
+                    if ($d2 != NULL)
+                        $result[self::OUT][$d2][$team][$product] = $total2;
                 }
             }
         }
