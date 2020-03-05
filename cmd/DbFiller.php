@@ -55,10 +55,11 @@ Usage : DbFiller.php [options] -c <csv_file>
         $team = $csv_line[2];
         $product = $csv_line[18];
 
+
         if (empty($dateMad) || empty($team) || empty($product))
             return false;
         else {
-            $dateMadFormatted = \DateTime::createFromFormat('d/m/Y', $dateMad);
+            $dateMadFormatted = \DateTime::createFromFormat('m/d/Y', $dateMad);
             StockDAO::getSharedInstance()->add($team, $product, $dateMadFormatted->format('Y-m-d'));
             return true;
         }
@@ -75,8 +76,8 @@ Usage : DbFiller.php [options] -c <csv_file>
         if (empty($dateSortie) || empty($team) || empty($product) || empty($clean))
             return false;
         else {
-            $dateSortieFormatted = \DateTime::createFromFormat('d/m/Y', $dateSortie);
-            $dateEntreeFormatted = \DateTime::createFromFormat('d/m/Y', $dateEntree);
+            $dateSortieFormatted = \DateTime::createFromFormat('m/d/Y', $dateSortie);
+            $dateEntreeFormatted = \DateTime::createFromFormat('m/d/Y', $dateEntree);
             CelanDAO::getSharedInstance()->add($product, $dateEntreeFormatted->format('Y-m-d'), $dateSortieFormatted->format('Y-m-d'), $team, $clean);
             return true;
         }
