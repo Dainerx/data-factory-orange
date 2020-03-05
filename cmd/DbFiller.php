@@ -51,16 +51,24 @@ Usage : DbFiller.php [options] -c <csv_file>
 
     private function insertStockVariationLine($csv_line)
     {
-        $dateMad = $csv_line[1];
+        $dateSortie = $csv_line[1];
+        $dateEntree = $csv_line[10];
         $team = $csv_line[2];
         $product = $csv_line[18];
 
 
-        if (empty($dateMad) || empty($team) || empty($product))
+        if (empty($dateEntree) || empty($team) || empty($product))
             return false;
         else {
-            $dateMadFormatted = \DateTime::createFromFormat('m/d/Y', $dateMad);
-            StockDAO::getSharedInstance()->add($team, $product, $dateMadFormatted->format('Y-m-d'));
+            $dateEntreeFormatted = \DateTime::createFromFormat('m/d/Y', $dateEntree);
+            $dateEntreeFormatted = $dateEntreeFormatted->format('Y-m-d');
+            if (empty($dateSortie))
+                $dateSortieFormatted = NULL;
+            else {
+                $dateSortieFormatted = \DateTime::createFromFormat('m/d/Y', $dateSortie);
+                $dateSortieFormatted = $dateSortieFormatted->format('Y-m-d');
+            }
+            StockDAO::getSharedInstance()->add($team, $product, $dateEntreeFormatted, $dateSortieFormatted);
             return true;
         }
     }

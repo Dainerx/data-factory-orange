@@ -9,6 +9,9 @@ use JsonSerializable;
 
 class CelanDAO
 {
+    const IN = "Entree";
+    const OUT = "Sortie";
+
     private static $sharedInstance;
     private function __construct()
     {

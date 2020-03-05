@@ -8,6 +8,8 @@ use Database\DataBaseManager;
 
 class StockDAO
 {
+    const IN = "Entree";
+    const OUT = "Sortie";
     private static $sharedInstance;
     private function __construct()
     {
@@ -20,39 +22,56 @@ class StockDAO
         return self::$sharedInstance;
     }
 
-    public function add($team, $product, $date)
+    public function add($team, $product, $date1, $date2)
     {
-        DataBaseManager::getSharedInstance()->exec("INSERT INTO stock_variation (team,product,date)
-         VALUES (?,?,?)", [$team, $product, $date]);
+        if ($date2 == NULL)
+            DataBaseManager::getSharedInstance()->exec("INSERT INTO stock_variation (team,product,date1)
+        VALUES (?,?,?)", [$team, $product, $date1]);
+        else
+            DataBaseManager::getSharedInstance()->exec("INSERT INTO stock_variation (team,product,date1,date2)
+         VALUES (?,?,?,?)", [$team, $product, $date1, $date2]);
     }
 
     public function getAll()
     {
         $result = [];
-        $dates = $this->parseDbArray($this->getDistinctDates(), "date");
+        $dates = $this->parseDbDoublesDatesArray($this
+            ->getDistinctTwoDates(), "date1", "date2");
         $teams = $this->parseDbArray($this->getDistinctTeams(), "team");
         $products = $this->parseDbArray($this->getDistinctProducts(), "product");
-
-        foreach ($dates as $date) {
-            $result[$date] = [];
+        $result[self::IN] = [];
+        $result[self::OUT] = [];
+        foreach ($dates as $d) {
+            $d1 = $d[0];
+            $d2 = $d[1];
+            $result[self::IN][$d1] = [];
+            $result[self::OUT][$d2] = [];
             foreach ($teams as $team) {
-                $result[$date][$team] = [];
+                $result[self::IN][$d1][$team] = [];
+                $result[self::OUT][$d2][$team] = [];
                 foreach ($products as $product) {
-                    $result[$date][$team][$product] = $this->countProductForDateAndTeam(
-                        $date,
+                    $total1 = $this->countProductForDate1AndTeam(
+                        $d1,
                         $team,
                         $product
                     )['total'];
+                    $total2 = $this->countProductForDate2AndTeam(
+                        $d2,
+                        $team,
+                        $product
+                    )['total'];
+                    $result[self::IN][$d1][$team][$product] = $total1;
+                    $result[self::OUT][$d2][$team][$product] = $total2;
                 }
             }
         }
         return $result;
     }
 
-    private function getDistinctDates()
+    private function getDistinctTwoDates()
     {
-        return DataBaseManager::getSharedInstance()->getAll("SELECT DISTINCT(date) 
-        FROM stock_variation");
+        return DataBaseManager::getSharedInstance()->getAll("SELECT date1,date2 FROM 
+        stock_variation GROUP BY date1,date2");
     }
 
     private function getDistinctTeams()
@@ -67,15 +86,34 @@ class StockDAO
            FROM stock_variation");
     }
 
-    private function countProductForDateAndTeam($date, $team, $product)
+    private function countProductForDate1AndTeam($date, $team, $product)
     {
         return DataBaseManager::getSharedInstance()->get(
             "SELECT COUNT(id) AS total
-         FROM stock_variation WHERE date=? AND team=? AND product=?",
+         FROM stock_variation WHERE date1=? AND team=? AND product=?",
             [$date, $team, $product]
         );
     }
 
+    private function countProductForDate2AndTeam($date, $team, $product)
+    {
+        return DataBaseManager::getSharedInstance()->get(
+            "SELECT COUNT(id) AS total
+         FROM stock_variation WHERE date2=? AND team=? AND product=?",
+            [$date, $team, $product]
+        );
+    }
+
+
+    private function parseDbDoublesDatesArray($dbArray, $key1, $key2)
+    {
+        $parsedArray = [];
+        foreach ($dbArray as $entry) {
+            $couple = array($entry[$key1], $entry[$key2]);
+            array_push($parsedArray, $couple);
+        }
+        return $parsedArray;
+    }
     private function parseDbArray($dbArray, $key)
     {
         $parsedArray = [];
