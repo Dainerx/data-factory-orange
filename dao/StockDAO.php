@@ -36,15 +36,13 @@ class StockDAO
         foreach ($dates as $date) {
             $result[$date] = [];
             foreach ($teams as $team) {
-                array_push($result[$date], $team);
                 $result[$date][$team] = [];
                 foreach ($products as $product) {
-                    array_push($result[$date][$team], $product);
                     $result[$date][$team][$product] = $this->countProductForDateAndTeam(
                         $date,
                         $team,
                         $product
-                    );
+                    )['total'];
                 }
             }
         }
