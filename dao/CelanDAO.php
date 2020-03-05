@@ -53,7 +53,7 @@ class CelanDAO
                     reset($celanTotal);
                     $celanTotal = ($celanTotal[0] == NULL) ? 0 : $celanTotal[0];
                     if ($celanTotal != 0) {
-                        $entryCelan = new TotalCelan($celanTotal, $dateEntree, $dateSortie);
+                        $entryCelan = new TotalCelan($celanTotal, substr($dateEntree, 0, strlen($dateEntree) - 3), substr($dateSortie, 0, strlen($dateSortie) - 3));
                         array_push($result[$product][$team], $entryCelan);
                     }
                 }
